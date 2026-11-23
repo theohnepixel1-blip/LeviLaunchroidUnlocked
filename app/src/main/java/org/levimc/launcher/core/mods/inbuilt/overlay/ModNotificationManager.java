@@ -48,8 +48,7 @@ public class ModNotificationManager {
     }
 
     public void show(String modName, String modId) {
-        if (activity.isFinishing() || activity.isDestroyed()) return;
-        handler.post(() -> showInternal(modName, modId));
+        return;
     }
 
     private void showInternal(String modName, String modId) {

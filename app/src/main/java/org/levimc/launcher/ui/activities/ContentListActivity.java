@@ -128,6 +128,7 @@ public class ContentListActivity extends BaseActivity {
         DynamicAnim.applyPressScaleRecursively(binding.getRoot());
 
         contentType = getIntent().getIntExtra(EXTRA_CONTENT_TYPE, TYPE_WORLDS);
+        setActiveNavTab(contentType == TYPE_RESOURCE_PACKS ? R.id.nav_tab_packs : contentType == TYPE_WORLDS ? R.id.nav_tab_worlds : 0);
         contentManager = ContentManager.getInstance(this);
         versionManager = VersionManager.get(this);
         

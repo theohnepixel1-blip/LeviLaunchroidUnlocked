@@ -26,43 +26,13 @@ public final class NewsNotificationHelper {
     }
 
     public static void initialize(Context context) {
-        createChannel(context);
         try {
-            FirebaseMessaging.getInstance().subscribeToTopic(TOPIC);
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(TOPIC);
         } catch (Exception ignored) {
         }
     }
 
     public static void show(Context context, String id, String title, String body, String url) {
-        createChannel(context);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-                && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        Intent intent = new Intent(context, NewsActivity.class)
-                .putExtra(NewsActivity.EXTRA_NEWS_ID, id)
-                .putExtra(NewsActivity.EXTRA_NEWS_URL, url)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                context,
-                id == null ? 0 : id.hashCode(),
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification_leaf)
-                .setColor(ContextCompat.getColor(context, R.color.primary))
-                .setContentTitle(title)
-                .setContentText(body)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION);
-        NotificationManagerCompat.from(context).notify(id == null ? 7001 : id.hashCode(), builder.build());
     }
 
     private static void createChannel(Context context) {

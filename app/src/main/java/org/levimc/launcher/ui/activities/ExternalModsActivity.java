@@ -71,6 +71,7 @@ public final class ExternalModsActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_external_mods);
+        setActiveNavTab(R.id.nav_tab_mods);
 
         VersionManager versionManager = VersionManager.get(this);
         GameVersion selectedVersion = versionManager.getSelectedVersion();

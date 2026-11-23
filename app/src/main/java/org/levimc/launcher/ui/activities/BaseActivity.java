@@ -119,22 +119,26 @@ public class BaseActivity extends AppCompatActivity {
         }
 
         LinearLayout wrapper = new LinearLayout(this);
-        wrapper.setOrientation(LinearLayout.VERTICAL);
+        wrapper.setOrientation(LinearLayout.HORIZONTAL);
         wrapper.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
         ));
 
         View navBar = LayoutInflater.from(this).inflate(R.layout.nav_bar, wrapper, false);
+        int navWidth = (int) (188 * getResources().getDisplayMetrics().density);
+        navBar.setLayoutParams(new LinearLayout.LayoutParams(navWidth, ViewGroup.LayoutParams.MATCH_PARENT));
         wrapper.addView(navBar);
 
         LinearLayout.LayoutParams contentParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
+                0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
         contentView.setLayoutParams(contentParams);
         wrapper.addView(contentView);
 
         contentView.setAlpha(0f);
-        contentView.setTranslationY(8f * getResources().getDisplayMetrics().density);
+        contentView.setTranslationX(12f * getResources().getDisplayMetrics().density);
+        navBar.setAlpha(0f);
+        navBar.setTranslationX(-16f * getResources().getDisplayMetrics().density);
 
         super.setContentView(wrapper);
         navBarInjected = true;
@@ -144,7 +148,9 @@ public class BaseActivity extends AppCompatActivity {
 
         contentView.post(() -> {
             DynamicAnim.springAlphaTo(contentView, 1f).start();
-            DynamicAnim.springTranslationYTo(contentView, 0f).start();
+            DynamicAnim.springTranslationXTo(contentView, 0f).start();
+            DynamicAnim.springAlphaTo(navBar, 1f).start();
+            DynamicAnim.springTranslationXTo(navBar, 0f).start();
         });
     }
 
@@ -159,7 +165,8 @@ public class BaseActivity extends AppCompatActivity {
 
     private void setupBaseNavBar() {
         int[] tabIds = {
-            R.id.nav_tab_launch, R.id.nav_tab_instances,
+            R.id.nav_tab_launch, R.id.nav_tab_instances, R.id.nav_tab_mods,
+            R.id.nav_tab_packs, R.id.nav_tab_worlds,
             R.id.nav_tab_about, R.id.nav_tab_settings
         };
 
@@ -173,6 +180,7 @@ public class BaseActivity extends AppCompatActivity {
             tab.setTextColor(color);
             tab.setTypeface(tab.getTypeface(), android.graphics.Typeface.NORMAL);
             TextViewCompat.setCompoundDrawableTintList(tab, ColorStateList.valueOf(color));
+            DynamicAnim.applyPressScale(tab);
         }
 
         if (pm.hasBackgroundImage()) {
@@ -234,6 +242,13 @@ public class BaseActivity extends AppCompatActivity {
                 startActivity(new Intent(this, InstancesActivity.class));
             }
         });
+        findViewById(R.id.nav_tab_mods).setOnClickListener(v -> {
+            if (!(this instanceof ModsFullscreenActivity)) {
+                startActivity(new Intent(this, ModsFullscreenActivity.class));
+            }
+        });
+        findViewById(R.id.nav_tab_packs).setOnClickListener(v -> openContentSection(ContentListActivity.TYPE_RESOURCE_PACKS));
+        findViewById(R.id.nav_tab_worlds).setOnClickListener(v -> openContentSection(ContentListActivity.TYPE_WORLDS));
         findViewById(R.id.nav_tab_about).setOnClickListener(v -> {
             if (!(this instanceof AboutActivity)) {
                 startActivity(new Intent(this, AboutActivity.class));
@@ -246,13 +261,19 @@ public class BaseActivity extends AppCompatActivity {
         });
 
         refreshNavAccountUI();
-        refreshNewsBadge();
+    }
+
+    private void openContentSection(int contentType) {
+        if (this instanceof ContentListActivity
+                && getIntent().getIntExtra(ContentListActivity.EXTRA_CONTENT_TYPE, ContentListActivity.TYPE_WORLDS) == contentType) {
+            return;
+        }
+        Intent intent = new Intent(this, ContentListActivity.class);
+        intent.putExtra(ContentListActivity.EXTRA_CONTENT_TYPE, contentType);
+        startActivity(intent);
     }
 
     private void refreshNewsBadge() {
-        if (!navBarInjected) return;
-        NewsRepository.loadCached(this, (feed, error) -> applyNewsBadge(feed));
-        NewsRepository.refreshIfStale(this, (feed, error) -> applyNewsBadge(feed));
     }
 
     private void applyNewsBadge(NewsFeed feed) {
@@ -365,7 +386,8 @@ public class BaseActivity extends AppCompatActivity {
     protected void setActiveNavTab(int activeTabId) {
         if (!navBarInjected) return;
         int[] tabIds = {
-            R.id.nav_tab_launch, R.id.nav_tab_instances,
+            R.id.nav_tab_launch, R.id.nav_tab_instances, R.id.nav_tab_mods,
+            R.id.nav_tab_packs, R.id.nav_tab_worlds,
             R.id.nav_tab_about, R.id.nav_tab_settings
         };
 
